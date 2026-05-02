@@ -11,3 +11,164 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum RoomType {
+  STANDARD
+  DELUXE
+  SUITE
+  PRESIDENTIAL
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  CLEANING
+  MAINTENANCE
+  BOOKED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  STRIPE
+  CHAPA
+  CASH
+}
+
+enum UserRole {
+  GUEST
+  RECEPTIONIST
+  MANAGER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id          String   @id @default(uuid())
+  clerkId     String   @unique
+  email       String   @unique
+  firstName   String?
+  lastName    String?
+  phone       String?
+  role        UserRole @default(GUEST)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  bookings    Booking[]
+  payments    Payment[]
+  orders      KitchenOrder[]
+
+  @@map("users")
+}
+
+model Room {
+  id          String     @id @default(uuid())
+  roomNumber  String     @unique
+  type        RoomType
+  price       Float
+  status      RoomStatus @default(AVAILABLE)
+  description String?
+  imageUrl    String?
+  capacity    Int        @default(2)
+  amenities   String[]   // JSON array of amenities
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  bookings    Booking[]
+
+  @@map("rooms")
+}
+
+model Booking {
+  id            String        @id @default(uuid())
+  userId        String
+  roomId        String
+  checkInDate   DateTime
+  checkOutDate  DateTime
+  guestCount    Int           @default(1)
+  totalAmount   Float
+  status        BookingStatus @default(PENDING)
+  specialRequests String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room          Room          @relation(fields: [roomId], references: [id])
+  payments      Payment[]
+
+  @@map("bookings")
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  bookingId     String
+  userId        String
+  amount        Float
+  currency      String        @default("ETB")
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  transactionId String?
+  stripePaymentIntentId String?
+  chapaTransactionId String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  booking       Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model KitchenOrder {
+  id          String      @id @default(uuid())
+  userId      String
+  roomNumber  String
+  items       Json        // Array of menu items with quantities
+  totalAmount Float
+  status      OrderStatus @default(PENDING)
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("kitchen_orders")
+}
+
+model Analytics {
+  id          String   @id @default(uuid())
+  date        DateTime @db.Date
+  totalRevenue Float   @default(0)
+  totalBookings Int    @default(0)
+  occupancyRate Float  @default(0)
+  popularRoomTypes Json // Room type popularity data
+  createdAt   DateTime @default(now())
+
+  @@unique([date])
+  @@map("analytics")
+}

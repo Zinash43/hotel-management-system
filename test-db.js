@@ -1,0 +1,24 @@
+import { PrismaClient } from "./app/generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
+
+async function testConnection() {
+  try {
+    await prisma.$connect();
+    console.log("Database connected successfully");
+
+    // Try to query
+    const rooms = await prisma.room.findMany();
+    console.log("Rooms:", rooms);
+  } catch (error) {
+    console.error("Database connection failed:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+testConnection();
