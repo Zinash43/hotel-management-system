@@ -7,6 +7,7 @@ import {
   getRooms,
   updateRoom,
 } from "@/lib/actions/room.actions";
+import { RoomType } from "@/app/generated/prisma/enums";
 
 type Room = {
   id: string;
@@ -75,7 +76,7 @@ export default function RoomManagement() {
       // UPDATE EXISTING ROOM
       const result = await updateRoom(editingRoom.id, {
         number: formData.number,
-        type: formData.type,
+        type: formData.type as RoomType,
         price: Number(formData.price),
       });
 
@@ -89,7 +90,7 @@ export default function RoomManagement() {
       // CREATE NEW ROOM
       const result = await createRoom({
         number: formData.number,
-        type: formData.type,
+        type: formData.type as RoomType,
         price: Number(formData.price),
       });
 

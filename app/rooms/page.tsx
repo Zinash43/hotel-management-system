@@ -1,8 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import QRCode from "react-qr-code";
 import {
   Filter,
   Search,
@@ -118,6 +119,11 @@ export default function RoomsPage() {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [origin, setOrigin] = useState("");
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
 
   useEffect(() => {
     let filtered = rooms.filter((room) => {
@@ -408,6 +414,37 @@ export default function RoomsPage() {
                       View Details
                     </button>
                   </div>
+
+                  {room.status === "AVAILABLE" && origin && (
+                    <div className="mt-6 rounded-3xl border border-blue-100 bg-blue-50 p-4">
+                      <div className="flex items-center justify-between gap-4 mb-4">
+                        <div>
+                          <p className="text-sm font-semibold text-blue-800">
+                            Scan to order room service
+                          </p>
+                          <p className="text-xs text-blue-600">
+                            {room.roomNumber} will be attached to the order
+                          </p>
+                        </div>
+                        <Link
+                          href={`/order?room=${room.roomNumber}`}
+                          className="text-sm font-semibold text-blue-700"
+                        >
+                          Open menu
+                        </Link>
+                      </div>
+
+                      <div className="flex justify-center">
+                        <div className="bg-white p-3 rounded-3xl shadow-sm">
+                          <QRCode
+                            value={`${origin}/order?room=${room.roomNumber}`}
+                            size={104}
+                            level="Q"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             );

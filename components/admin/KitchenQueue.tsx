@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, ChevronRight } from "lucide-react";
 
@@ -25,6 +25,26 @@ const initialOrders = [
 
 export default function KitchenQueue() {
   const [orders, setOrders] = useState(initialOrders);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem("hotelFoodOrders");
+    if (!stored) return;
+
+    try {
+      const parsedOrders = JSON.parse(stored);
+      if (Array.isArray(parsedOrders) && parsedOrders.length > 0) {
+        setOrders(parsedOrders);
+      }
+    } catch {
+      // Ignore invalid stored order data
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("hotelFoodOrders", JSON.stringify(orders));
+  }, [orders]);
 
   const updateStatus = (id: string, newStatus: string) => {
     setOrders(

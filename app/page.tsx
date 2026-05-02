@@ -1,5 +1,7 @@
 "use client";
+import { useState, FormEvent } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Star,
@@ -17,6 +19,43 @@ import {
 import Navbar from "@/components/Navbar";
 
 export default function Home() {
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState("Standard Room");
+  const [bookingFormData, setBookingFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    checkIn: "",
+    checkOut: "",
+    guests: "2",
+    message: "",
+  });
+  const [bookingStatus, setBookingStatus] = useState("");
+
+  const handleBookNow = (roomType: string) => {
+    setSelectedRoom(roomType);
+    setShowBookingForm(true);
+    setBookingStatus("");
+  };
+
+  const handleBookingSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setBookingStatus("Sending request...");
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    setBookingStatus(
+      "Thank you! Your booking inquiry has been sent. We will contact you shortly.",
+    );
+    setBookingFormData({
+      name: "",
+      email: "",
+      phone: "",
+      checkIn: "",
+      checkOut: "",
+      guests: "2",
+      message: "",
+    });
+  };
+
   return (
     <main className="min-h-screen">
       <Navbar />
@@ -88,9 +127,14 @@ export default function Home() {
                 </div>
               </div>
               <div>
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl">
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleBookNow("Preferred Room")}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
                   Check Availability
-                </button>
+                </motion.button>
               </div>
             </div>
           </motion.div>
@@ -182,9 +226,15 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gray-50 rounded-2xl overflow-hidden shadow-lg">
-              <div className="h-64 bg-gray-200 relative">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="bg-gray-50 rounded-2xl overflow-hidden shadow-lg transition-transform duration-300 hover:-translate-y-1">
+              <div className="relative h-64 overflow-hidden">
+                <Image
+                  src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800"
+                  alt="Standard room"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <div className="absolute bottom-4 left-4 text-white">
                   <h3 className="text-2xl font-bold">Standard Room</h3>
                   <p className="text-sm opacity-90">Comfortable and elegant</p>
@@ -203,15 +253,26 @@ export default function Home() {
                   <li>• Free Wi-Fi</li>
                   <li>• Room service</li>
                 </ul>
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleBookNow("Standard Room")}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-all"
+                >
                   Book Now
-                </button>
+                </motion.button>
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-2xl overflow-hidden shadow-lg">
-              <div className="h-64 bg-gray-200 relative">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="bg-gray-50 rounded-2xl overflow-hidden shadow-lg transition-transform duration-300 hover:-translate-y-1">
+              <div className="relative h-64 overflow-hidden">
+                <Image
+                  src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=800"
+                  alt="Deluxe suite"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <div className="absolute bottom-4 left-4 text-white">
                   <h3 className="text-2xl font-bold">Deluxe Suite</h3>
                   <p className="text-sm opacity-90">Spacious and luxurious</p>
@@ -230,15 +291,26 @@ export default function Home() {
                   <li>• Mini bar</li>
                   <li>• Jacuzzi</li>
                 </ul>
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleBookNow("Deluxe Suite")}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-all"
+                >
                   Book Now
-                </button>
+                </motion.button>
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-2xl overflow-hidden shadow-lg">
-              <div className="h-64 bg-gray-200 relative">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="bg-gray-50 rounded-2xl overflow-hidden shadow-lg transition-transform duration-300 hover:-translate-y-1">
+              <div className="relative h-64 overflow-hidden">
+                <Image
+                  src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800"
+                  alt="Executive suite"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <div className="absolute bottom-4 left-4 text-white">
                   <h3 className="text-2xl font-bold">Executive Suite</h3>
                   <p className="text-sm opacity-90">Ultimate luxury</p>
@@ -257,14 +329,198 @@ export default function Home() {
                   <li>• Private butler service</li>
                   <li>• Premium amenities</li>
                 </ul>
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleBookNow("Executive Suite")}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-all"
+                >
                   Book Now
-                </button>
+                </motion.button>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {showBookingForm && (
+        <section className="py-20 bg-slate-50">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+              <div>
+                <h2 className="text-4xl font-bold text-gray-900">
+                  Book {selectedRoom}
+                </h2>
+                <p className="text-gray-600 max-w-2xl mt-3">
+                  Fill out the quick booking form and our reservations team will
+                  contact you soon.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBookingForm(false)}
+                className="text-blue-600 hover:text-blue-800 font-semibold"
+              >
+                Close Form
+              </button>
+            </div>
+
+            <motion.form
+              onSubmit={handleBookingSubmit}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-3xl shadow-xl p-8"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Jane Doe"
+                    value={bookingFormData.name}
+                    onChange={(e) =>
+                      setBookingFormData({
+                        ...bookingFormData,
+                        name: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="jane@example.com"
+                    value={bookingFormData.email}
+                    onChange={(e) =>
+                      setBookingFormData({
+                        ...bookingFormData,
+                        email: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="+251 911 123 456"
+                    value={bookingFormData.phone}
+                    onChange={(e) =>
+                      setBookingFormData({
+                        ...bookingFormData,
+                        phone: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Guests
+                  </label>
+                  <select
+                    value={bookingFormData.guests}
+                    onChange={(e) =>
+                      setBookingFormData({
+                        ...bookingFormData,
+                        guests: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  >
+                    {[1, 2, 3, 4].map((count) => (
+                      <option key={count} value={count}>
+                        {count} Guest{count > 1 ? "s" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Check-in Date
+                  </label>
+                  <input
+                    type="date"
+                    value={bookingFormData.checkIn}
+                    onChange={(e) =>
+                      setBookingFormData({
+                        ...bookingFormData,
+                        checkIn: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Check-out Date
+                  </label>
+                  <input
+                    type="date"
+                    value={bookingFormData.checkOut}
+                    onChange={(e) =>
+                      setBookingFormData({
+                        ...bookingFormData,
+                        checkOut: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Special Requests
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder="Add any special requests or preferences"
+                  value={bookingFormData.message}
+                  onChange={(e) =>
+                    setBookingFormData({
+                      ...bookingFormData,
+                      message: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+
+              <div className="mt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-2xl font-semibold transition-all"
+                >
+                  Send Booking Request
+                </motion.button>
+                {bookingStatus ? (
+                  <p className="text-sm text-gray-600">{bookingStatus}</p>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    We will contact you within 1 business day.
+                  </p>
+                )}
+              </div>
+            </motion.form>
+          </div>
+        </section>
+      )}
 
       {/* Amenities Section */}
       <section className="py-20 bg-gray-900 text-white">
@@ -278,36 +534,60 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Wifi className="w-8 h-8" />
+            <div className="text-center rounded-3xl overflow-hidden bg-white/10 p-4 shadow-lg">
+              <div className="relative h-28 rounded-3xl overflow-hidden mb-4">
+                <Image
+                  src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=400"
+                  alt="Hotel Wi-Fi lounge"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-black/30" />
               </div>
               <h3 className="text-lg font-semibold mb-2">Free Wi-Fi</h3>
               <p className="text-gray-300 text-sm">
                 High-speed internet throughout the hotel
               </p>
             </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Utensils className="w-8 h-8" />
+            <div className="text-center rounded-3xl overflow-hidden bg-white/10 p-4 shadow-lg">
+              <div className="relative h-28 rounded-3xl overflow-hidden mb-4">
+                <Image
+                  src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400"
+                  alt="Fine dining"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-black/30" />
               </div>
               <h3 className="text-lg font-semibold mb-2">Fine Dining</h3>
               <p className="text-gray-300 text-sm">
                 Multiple restaurants and bars
               </p>
             </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Dumbbell className="w-8 h-8" />
+            <div className="text-center rounded-3xl overflow-hidden bg-white/10 p-4 shadow-lg">
+              <div className="relative h-28 rounded-3xl overflow-hidden mb-4">
+                <Image
+                  src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=400"
+                  alt="Fitness center"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-black/30" />
               </div>
               <h3 className="text-lg font-semibold mb-2">Fitness Center</h3>
               <p className="text-gray-300 text-sm">
                 24/7 gym with modern equipment
               </p>
             </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Car className="w-8 h-8" />
+            <div className="text-center rounded-3xl overflow-hidden bg-white/10 p-4 shadow-lg">
+              <div className="relative h-28 rounded-3xl overflow-hidden mb-4">
+                <Image
+                  src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=400"
+                  alt="Valet parking"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-black/30" />
               </div>
               <h3 className="text-lg font-semibold mb-2">Valet Parking</h3>
               <p className="text-gray-300 text-sm">
@@ -322,9 +602,12 @@ export default function Home() {
       <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose KANA</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Why Choose KANA
+            </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Discover what makes us Addis Ababa's premier luxury hotel destination
+              Discover what makes us Addis Ababa's premier luxury hotel
+              destination
             </p>
           </div>
 
@@ -333,9 +616,12 @@ export default function Home() {
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <MapPin className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Prime Location</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Prime Location
+              </h3>
               <p className="text-gray-600">
-                Centrally located in Addis Ababa with easy access to business districts, shopping, and cultural attractions.
+                Centrally located in Addis Ababa with easy access to business
+                districts, shopping, and cultural attractions.
               </p>
             </div>
 
@@ -343,9 +629,12 @@ export default function Home() {
               <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Star className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">5-Star Service</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                5-Star Service
+              </h3>
               <p className="text-gray-600">
-                Award-winning hospitality with personalized service that anticipates your every need.
+                Award-winning hospitality with personalized service that
+                anticipates your every need.
               </p>
             </div>
 
@@ -353,9 +642,12 @@ export default function Home() {
               <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Wifi className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Modern Amenities</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Modern Amenities
+              </h3>
               <p className="text-gray-600">
-                State-of-the-art facilities including high-speed WiFi, fitness center, and business services.
+                State-of-the-art facilities including high-speed WiFi, fitness
+                center, and business services.
               </p>
             </div>
 
@@ -363,9 +655,12 @@ export default function Home() {
               <div className="w-16 h-16 bg-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Utensils className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Culinary Excellence</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Culinary Excellence
+              </h3>
               <p className="text-gray-600">
-                Multiple dining options featuring Ethiopian and international cuisine prepared by master chefs.
+                Multiple dining options featuring Ethiopian and international
+                cuisine prepared by master chefs.
               </p>
             </div>
           </div>
@@ -376,7 +671,9 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">What Our Guests Say</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              What Our Guests Say
+            </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Don't just take our word for it - hear from our satisfied guests
             </p>
@@ -386,11 +683,17 @@ export default function Home() {
             <div className="bg-gray-50 p-8 rounded-2xl">
               <div className="flex items-center mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  <Star
+                    key={i}
+                    className="w-5 h-5 text-yellow-400 fill-current"
+                  />
                 ))}
               </div>
               <p className="text-gray-700 mb-6 italic">
-                "An exceptional experience from start to finish. The staff was incredibly attentive, and the rooms were immaculate. The location in Addis Ababa is perfect for both business and leisure travelers."
+                "An exceptional experience from start to finish. The staff was
+                incredibly attentive, and the rooms were immaculate. The
+                location in Addis Ababa is perfect for both business and leisure
+                travelers."
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
@@ -406,11 +709,17 @@ export default function Home() {
             <div className="bg-gray-50 p-8 rounded-2xl">
               <div className="flex items-center mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  <Star
+                    key={i}
+                    className="w-5 h-5 text-yellow-400 fill-current"
+                  />
                 ))}
               </div>
               <p className="text-gray-700 mb-6 italic">
-                "KANA Hotel exceeded all my expectations. The blend of Ethiopian hospitality with modern luxury is unparalleled. The dining experience was outstanding, and the spa treatments were rejuvenating."
+                "KANA Hotel exceeded all my expectations. The blend of Ethiopian
+                hospitality with modern luxury is unparalleled. The dining
+                experience was outstanding, and the spa treatments were
+                rejuvenating."
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
@@ -426,11 +735,16 @@ export default function Home() {
             <div className="bg-gray-50 p-8 rounded-2xl">
               <div className="flex items-center mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  <Star
+                    key={i}
+                    className="w-5 h-5 text-yellow-400 fill-current"
+                  />
                 ))}
               </div>
               <p className="text-gray-700 mb-6 italic">
-                "From the moment I arrived, I felt welcomed and valued. The attention to detail in every aspect of the hotel is remarkable. It's not just a place to stay - it's an experience to remember."
+                "From the moment I arrived, I felt welcomed and valued. The
+                attention to detail in every aspect of the hotel is remarkable.
+                It's not just a place to stay - it's an experience to remember."
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
@@ -446,6 +760,8 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
@@ -505,12 +821,14 @@ export default function Home() {
                   placeholder="Your Message"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 ></textarea>
-                <button
+                <motion.button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-all"
                 >
                   Send Message
-                </button>
+                </motion.button>
               </form>
             </div>
           </div>
@@ -549,7 +867,10 @@ export default function Home() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/rooms" className="hover:text-white transition-colors">
+                  <Link
+                    href="/rooms"
+                    className="hover:text-white transition-colors"
+                  >
                     Rooms
                   </Link>
                 </li>

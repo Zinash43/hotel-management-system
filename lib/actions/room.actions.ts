@@ -9,6 +9,7 @@ import { PrismaClient } from "../../app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { revalidatePath } from "next/cache";
+import { RoomType, RoomStatus } from "../../app/generated/prisma/enums";
 
 // Singleton pattern to prevent opening too many connections to Neon
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -31,7 +32,7 @@ type CreateRoomResult =
  */
 export async function createRoom(data: {
   number: string;
-  type: string;
+  type: RoomType;
   price: number;
 }): Promise<CreateRoomResult> {
   try {
@@ -76,7 +77,12 @@ export async function getRooms() {
  */
 export async function updateRoom(
   id: string,
-  data: { number?: string; type?: string; price?: number; status?: string },
+  data: {
+    number?: string;
+    type?: RoomType;
+    price?: number;
+    status?: RoomStatus;
+  },
 ) {
   try {
     const updatedRoom = await prisma.room.update({
