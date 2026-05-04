@@ -76,6 +76,14 @@ const mockPayments: Payment[] = [
     status: "COMPLETED",
     createdAt: "2026-05-20",
   },
+  {
+    id: "3",
+    bookingId: "3",
+    amount: 240,
+    method: "CASH",
+    status: "COMPLETED",
+    createdAt: "2026-05-15",
+  },
 ];
 
 export default function DashboardPage() {

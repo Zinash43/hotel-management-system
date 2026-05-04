@@ -17,6 +17,14 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { format, addDays, differenceInDays } from "date-fns";
+import {
+  processStripePayment,
+  processChapaPayment,
+  processCashPayment,
+} from "@/lib/actions/payment.actions";
+import { createBooking } from "@/lib/actions/booking.actions";
+import StripeProvider from "@/components/StripeProvider";
+import StripePaymentForm from "@/components/StripePaymentForm";
 
 type BookingStep = "dates" | "details" | "payment" | "confirmation";
 
@@ -30,6 +38,7 @@ interface BookingData {
   email: string;
   phone: string;
   specialRequests: string;
+  paymentMethod: string;
 }
 
 const mockRoom = {
@@ -73,9 +82,14 @@ function BookingPageContent() {
     email: "",
     phone: "",
     specialRequests: "",
+    paymentMethod: "stripe",
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(
+    null,
+  );
+  const [chapaCheckoutUrl, setChapaCheckoutUrl] = useState<string | null>(null);
 
   const steps = [
     { id: "dates", title: "Select Dates", icon: Calendar },
@@ -111,10 +125,98 @@ function BookingPageContent() {
 
   const handleSubmit = async () => {
     setIsProcessing(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setCurrentStep("confirmation");
-    setIsProcessing(false);
+
+    try {
+      // First, create the booking
+      const bookingResult = await createBooking({
+        roomId: bookingData.roomId,
+        checkInDate: bookingData.checkInDate!,
+        checkOutDate: bookingData.checkOutDate!,
+        guestCount: bookingData.guestCount,
+        firstName: bookingData.firstName,
+        lastName: bookingData.lastName,
+        email: bookingData.email,
+        phone: bookingData.phone,
+        specialRequests: bookingData.specialRequests,
+      });
+
+      if (!bookingResult.success) {
+        alert(`Booking creation failed: ${bookingResult.error}`);
+        setIsProcessing(false);
+        return;
+      }
+
+      const actualBookingId = bookingResult.bookingId;
+      const totalAmount = calculateTotal();
+
+      switch (bookingData.paymentMethod) {
+        case "stripe": {
+          const paymentResult = await processStripePayment({
+            bookingId: actualBookingId,
+            amount: totalAmount,
+            currency: "usd",
+          });
+
+          if (paymentResult.success && paymentResult.clientSecret) {
+            setStripeClientSecret(paymentResult.clientSecret);
+            // Don't advance to confirmation yet - wait for Stripe payment completion
+          } else if (!paymentResult.success) {
+            alert(`Payment initialization failed: ${paymentResult.error}`);
+          } else {
+            alert("Payment initialization failed: Missing client secret");
+          }
+          break;
+        }
+
+        case "chapa": {
+          const paymentResult = await processChapaPayment({
+            bookingId: actualBookingId,
+            amount: totalAmount,
+            currency: "ETB",
+            customerInfo: {
+              firstName: bookingData.firstName,
+              lastName: bookingData.lastName,
+              email: bookingData.email,
+              phone: bookingData.phone,
+            },
+          });
+
+          if (paymentResult.success && paymentResult.checkoutUrl) {
+            setChapaCheckoutUrl(paymentResult.checkoutUrl);
+            // Redirect to Chapa checkout
+            window.location.href = paymentResult.checkoutUrl;
+          } else if (!paymentResult.success) {
+            alert(`Payment initialization failed: ${paymentResult.error}`);
+          } else {
+            alert("Payment initialization failed: Missing checkout URL");
+          }
+          break;
+        }
+
+        case "cash": {
+          const paymentResult = await processCashPayment({
+            bookingId: actualBookingId,
+            amount: totalAmount,
+            currency: "ETB",
+          });
+
+          if (paymentResult.success) {
+            setCurrentStep("confirmation");
+          } else {
+            alert(`Payment failed: ${paymentResult.error}`);
+          }
+          break;
+        }
+
+        default:
+          throw new Error("Invalid payment method");
+      }
+    } catch (error) {
+      console.error("Booking/Payment processing error:", error);
+      alert("Booking/Payment processing failed. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const renderStepContent = () => {
@@ -318,6 +420,33 @@ function BookingPageContent() {
         );
 
       case "payment":
+        if (stripeClientSecret) {
+          return (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-6"
+            >
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Complete Payment
+                </h2>
+                <p className="text-gray-600">
+                  Enter your card details to complete the booking
+                </p>
+              </div>
+
+              <StripeProvider>
+                <StripePaymentForm
+                  clientSecret={stripeClientSecret}
+                  onSuccess={() => setCurrentStep("confirmation")}
+                  onError={(error) => alert(`Payment failed: ${error}`)}
+                />
+              </StripeProvider>
+            </motion.div>
+          );
+        }
+
         return (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -339,7 +468,13 @@ function BookingPageContent() {
                     type="radio"
                     name="payment"
                     value="stripe"
-                    defaultChecked
+                    checked={bookingData.paymentMethod === "stripe"}
+                    onChange={(e) =>
+                      setBookingData({
+                        ...bookingData,
+                        paymentMethod: e.target.value,
+                      })
+                    }
                     className="mr-3"
                   />
                   <div className="flex items-center">
@@ -354,6 +489,13 @@ function BookingPageContent() {
                     type="radio"
                     name="payment"
                     value="chapa"
+                    checked={bookingData.paymentMethod === "chapa"}
+                    onChange={(e) =>
+                      setBookingData({
+                        ...bookingData,
+                        paymentMethod: e.target.value,
+                      })
+                    }
                     className="mr-3"
                   />
                   <div className="flex items-center">
@@ -363,14 +505,37 @@ function BookingPageContent() {
                     </span>
                   </div>
                 </div>
+                <div className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="cash"
+                    checked={bookingData.paymentMethod === "cash"}
+                    onChange={(e) =>
+                      setBookingData({
+                        ...bookingData,
+                        paymentMethod: e.target.value,
+                      })
+                    }
+                    className="mr-3"
+                  />
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-2">💵</span>
+                    <span className="font-medium">Cash (Pay at Reception)</span>
+                  </div>
+                </div>
               </div>
             </div>
 
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-blue-800">Demo Mode:</span>
+                <span className="text-sm text-blue-800">
+                  Payment Processing:
+                </span>
                 <span className="text-sm font-medium text-blue-800">
-                  Payment processing is simulated
+                  {bookingData.paymentMethod === "cash"
+                    ? "Cash payment will be collected at reception"
+                    : "Secure payment processing with real gateways"}
                 </span>
               </div>
             </div>
@@ -427,6 +592,16 @@ function BookingPageContent() {
                   <span className="text-gray-600">Guests:</span>
                   <span className="font-medium">{bookingData.guestCount}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Payment:</span>
+                  <span className="font-medium">
+                    {bookingData.paymentMethod === "stripe"
+                      ? "Credit/Debit Card"
+                      : bookingData.paymentMethod === "chapa"
+                        ? "Chapa"
+                        : "Cash"}
+                  </span>
+                </div>
                 <div className="flex justify-between border-t pt-2 mt-2">
                   <span className="text-gray-900 font-semibold">Total:</span>
                   <span className="font-bold text-lg">${calculateTotal()}</span>
@@ -442,7 +617,7 @@ function BookingPageContent() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-50 pt-24">
       <Navbar />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -496,7 +671,7 @@ function BookingPageContent() {
             </div>
 
             {/* Navigation Buttons */}
-            {currentStep !== "confirmation" && (
+            {currentStep !== "confirmation" && !stripeClientSecret && (
               <div className="flex justify-between mt-6">
                 <button
                   onClick={handlePrev}
